@@ -4,11 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "cervezas")
-class CervezaEntity {
-
+class CervezaEntity (
     @PrimaryKey(autoGenerate = true)
-    var IdCerveza: Int = 0
-    var Nombre: String = ""
-    var Marca: String = ""
+    var IdCerveza: Int = 0,
+    var Nombre: String = "",
+    var Marca: String = "",
     var Puntuacion: Int = 0
-}
+)
