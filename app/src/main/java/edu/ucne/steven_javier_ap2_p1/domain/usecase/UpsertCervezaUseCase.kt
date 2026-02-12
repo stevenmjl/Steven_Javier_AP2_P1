@@ -8,6 +8,14 @@ class UpsertCervezaUseCase @Inject constructor(
     private val repository: CervezaRepository
 ) {
     suspend operator fun invoke(cerveza: Cerveza): Result<Int> {
+        val vNombre = validateNombre(cerveza.nombre)
+        if (!vNombre.isValid) return Result.failure(IllegalArgumentException(vNombre.error))
+
+        val vMarca = validateMarca(cerveza.marca)
+        if (!vMarca.isValid) return Result.failure(IllegalArgumentException(vMarca.error))
+
+        val vPuntuacion = validatePuntuacion(cerveza.puntuacion.toString())
+        if (!vPuntuacion.isValid) return Result.failure(IllegalArgumentException(vPuntuacion.error))
 
         return runCatching { repository.upsert(cerveza) }
     }
