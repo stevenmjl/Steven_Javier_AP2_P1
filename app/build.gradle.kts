@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "edu.ucne.steven_javier_ap2_p1"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "edu.ucne.steven_javier_ap2_p1"
@@ -77,6 +77,8 @@ dependencies {
     // --- Room Database ---
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
     ksp(libs.androidx.room.compiler)
 
     // --- Hilt ---
