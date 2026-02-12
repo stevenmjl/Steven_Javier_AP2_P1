@@ -4,33 +4,36 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-//import edu.ucne.steven_javier_ap2_p1.presentation.entidad.edit.BorrameEditScreen
-//import edu.ucne.steven_javier_ap2_p1.presentation.entidad.list.BorrameListScreen
-
-sealed class Pantalla(val ruta: String) {
-    data object Lista : Pantalla("lista_borrame")
-    data object Editar : Pantalla("editar_borrame")
-}
+import androidx.navigation.toRoute
+import edu.ucne.steven_javier_ap2_p1.presentation.cerveza.list.CervezaListScreen
+import edu.ucne.steven_javier_ap2_p1.presentation.cerveza.edit.CervezaEditScreen
+import edu.ucne.steven_javier_ap2_p1.presentation.Screen
 
 @Composable
-fun AppNavigation(
-    navController: NavHostController = rememberNavController()
-) {
+fun NavHost(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = Pantalla.Lista.ruta
+        startDestination = Screen.CervezaList
     ) {
-//        composable(Pantalla.Lista.ruta) {
-//            BorrameListScreen(
-//                onIrAEditar = { navController.navigate(Pantalla.Editar.ruta) }
-//            )
-//        }
-//
-//        composable(Pantalla.Editar.ruta) {
-//            //BorrameEditScreen(
-//                onVolver = { navController.popBackStack() }
-//            )
-//        }
+        composable<Screen.CervezaList> {
+            CervezaListScreen(
+                onNavigateToCreate = {
+                    navController.navigate(Screen.CervezaEdit(0))
+                },
+                onNavigateToEdit = { id ->
+                    navController.navigate(Screen.CervezaEdit(id))
+                }
+            )
+        }
+
+        composable<Screen.CervezaEdit> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.CervezaEdit>()
+            CervezaEditScreen(
+                cervezaId = args.id,
+                onNavigateBack = {
+                    navController.navigateUp()
+                }
+            )
+        }
     }
 }
