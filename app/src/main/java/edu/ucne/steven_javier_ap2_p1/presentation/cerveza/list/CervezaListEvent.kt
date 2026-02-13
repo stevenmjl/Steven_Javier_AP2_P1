@@ -6,4 +6,8 @@ sealed interface CervezaListEvent {
     data object CreateNew : CervezaListEvent
     data class Edit(val id: Int) : CervezaListEvent
     data class ShowMessage(val message: String) : CervezaListEvent
+
+    // Requerimiento de filtro
+    data class FiltroNombreChanged(val texto: String) : CervezaListEvent
+    data class FiltroMarcaChanged(val texto: String) : CervezaListEvent
 }
