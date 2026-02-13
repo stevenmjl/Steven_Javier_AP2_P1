@@ -33,21 +33,69 @@ class CervezaListViewModel @Inject constructor(
             CervezaListEvent.CreateNew -> _state.update { it.copy(navigateToCreate = true) }
             is CervezaListEvent.Edit -> _state.update { it.copy(navigateToEditId = event.id) }
             is CervezaListEvent.ShowMessage -> _state.update { it.copy(message = event.message) }
+
+            is CervezaListEvent.FiltroNombreChanged -> {
+                _state.update { it.copy(filtroNombre = event.texto) }
+                aplicarFiltros()
+            }
+            is CervezaListEvent.FiltroMarcaChanged -> {
+                _state.update { it.copy(filtroMarca = event.texto) }
+                aplicarFiltros()
+            }
         }
     }
 
     private fun observe() {
         viewModelScope.launch {
-            observeCervezasUseCase().collectLatest { list ->
-                _state.update { it.copy(isLoading = false, cervezas = list, message = null) }
+            observeCervezasUseCase().collectLatest { listaCompleta ->
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        cervezas = listaCompleta,
+                        message = null
+                    )
+                }
+                aplicarFiltros()
             }
+        }
+    }
+
+    private fun aplicarFiltros() {
+        val listaCompleta = _state.value.cervezas
+        val filtroNombre = _state.value.filtroNombre.trim().lowercase()
+        val filtroMarca = _state.value.filtroMarca.trim().lowercase()
+
+        val listaFiltrada = listaCompleta.filter { cerveza ->
+            (filtroNombre.isEmpty() || cerveza.nombre.lowercase().contains(filtroNombre)) &&
+                    (filtroMarca.isEmpty() || cerveza.marca.lowercase().contains(filtroMarca))
+        }
+
+        val conteo = listaFiltrada.size
+        val promedio = if (listaFiltrada.isEmpty()) {
+            0.0
+        } else {
+            listaFiltrada.map { it.puntuacion }.average()
+        }
+
+        _state.update {
+            it.copy(
+                cervezasFiltradas = listaFiltrada,
+                conteoFiltrado = conteo,
+                promedioPuntuacion = String.format("%.1f", promedio).toDouble()
+            )
         }
     }
 
     private fun onDelete(id: Int) {
         viewModelScope.launch {
-            deleteCervezaUseCase(id)
-            onEvent(CervezaListEvent.ShowMessage("Cerveza eliminada"))
+            val result = runCatching { deleteCervezaUseCase(id) }
+
+            if (result.isSuccess) {
+                onEvent(CervezaListEvent.ShowMessage("Cerveza eliminada"))
+            } else {
+                val errorMsg = result.exceptionOrNull()?.message ?: "Error al eliminar la cerveza"
+                onEvent(CervezaListEvent.ShowMessage(errorMsg))
+            }
         }
     }
 
